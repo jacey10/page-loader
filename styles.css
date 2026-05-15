@@ -1,0 +1,217 @@
+:root {
+  /* ── COLOR PALETTE ── */
+  --bg:          #151515;
+  --surface:     #1e1e1e;
+  --header-bg:   #181818;
+  --border:      #333333;
+  --mint:        #00B48A;
+  --white:       #FFFFFF;
+  --grey:        #D9D9D9;
+  --code-text:   #cccccc;
+  --keyword:     #777777;
+  --variable:    #00B48A;
+  --string:      #CE9178;
+  --success:     #28ca41;
+
+  /* ── TYPOGRAPHY ── */
+  --font-main:   'Space Grotesk', sans-serif;
+  --font-mono:   'Courier New', monospace;
+
+  /* ── TRANSITIONS ── */
+  --ease:        0.2s ease;
+  --ease-long:   0.6s ease;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font-main);
+  min-height: 100vh; /* Fixed from min-width */
+  overflow-x: hidden;
+}
+
+/* ── ENTRY SCREEN ─ */
+.entry-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 2000;
+}
+.entry-screen.hidden { display: none; }
+
+#enterBtn {
+  padding: 1rem 2rem;
+  background: var(--mint);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform var(--ease), opacity var(--ease);
+}
+#enterBtn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+/* ── LOADER ── */
+.loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 1000;
+}
+.loader.hidden { display: none; }
+
+.window {
+  width: 90%;
+  max-width: 500px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: floatIn var(--ease-long) ease-out;
+}
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  gap: 6px;
+  padding: 12px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.red    { background: #ff5f57; }
+.yellow { background: #ffbd2e; }
+.green  { background: var(--success); }
+
+.code-block {
+  padding: 24px;
+  font-family: var(--font-mono);
+  line-height: 1.8;
+  font-size: 0.95rem;
+  color: var(--code-text);
+}
+.keyword  { color: var(--keyword); }
+.variable { color: var(--variable); font-weight: 700; }
+.value    { color: var(--string); }
+
+/* ─ CURSOR ── */
+.value.typing::after {
+  content: "|";
+  color: var(--mint);
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── LOADING COMMENT & DOTS ── */
+.comment {
+  color: var(--mint);
+  font-style: italic;
+  margin-top: 8px;
+  display: block;
+}
+.dots {
+  display: inline-block;
+  min-width: 1.5em; /* Prevents layout jump */
+  animation: pulse-dots 1.2s ease-in-out infinite;
+}
+@keyframes pulse-dots {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+.comment.loaded .status-text { color: var(--success); }
+.comment.loaded .dots { display: none; }
+
+/* ── CONTROLS ── */
+.controls {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.15);
+}
+.controls button {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--code-text);
+  padding: 8px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-weight: 600;
+  transition: all var(--ease);
+}
+.controls button:hover {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: rgba(0, 180, 138, 0.05);
+}
+
+/* ── PORTFOLIO ── */
+.portfolio {
+  min-height: 100vh;
+  opacity: 0;
+  padding: 60px 24px;
+  transition: opacity var(--ease-long);
+  pointer-events: none;
+}
+.portfolio.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.hero h1 span {
+  color: var(--mint);
+  border-bottom: 3px solid var(--mint);
+}
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--grey);
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+.btn {
+  display: inline-block;
+  padding: 0.8rem 1.6rem;
+  background: transparent;
+  color: var(--mint);
+  border: 1px solid var(--mint);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all var(--ease);
+}
+.btn:hover {
+  background: var(--mint);
+  color: var(--bg);
+  transform: translateY(-2px);
+}

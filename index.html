@@ -7,74 +7,59 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- ENTRY SCREEN -->
-<div id="entryScreen" class="entry-screen">
-  <button id="enterBtn">Enter Portfolio</button>
-</div>
-
-<!-- LOADER -->
-<div id="loader" class="loader hidden">
-
-  <div class="window">
-
-    <div class="header">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-    </div>
-
-    <div class="code-block">
-
-      <div class="line">
-        <span class="keyword">const</span>
-        <span class="variable">dev</span>
-        <span>= {</span>
-      </div>
-
-      <div class="line">
-        &nbsp;&nbsp;name:
-        <span class="value" data-value='"Jay Cee"'></span>,
-      </div>
-
-      <div class="line">
-        &nbsp;&nbsp;role:
-        <span class="value" data-value='"Frontend Developer"'></span>,
-      </div>
-
-      <div class="line">
-        &nbsp;&nbsp;status:
-        <span class="value" data-value='"Available for work"'></span>
-      </div>
-
-      <div class="line">}</div>
-
-    </div>
-
-    <div class="controls">
-      <button id="skipBtn">Skip</button>
-      <button id="replayBtn">Replay</button>
-      <button id="soundBtn">Sound: On</button>
-    </div>
-
+  <!-- 1. ENTRY SCREEN -->
+  <div class="entry-screen" id="entryScreen">
+    <button id="enterBtn">Enter Portfolio</button>
   </div>
 
-</div>
+  <!-- 2. LOADER -->
+  <div class="loader" id="loader">
+    <div class="window">
+      <div class="header">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+      </div>
+      
+      <div class="code-block">
+        <div class="line"><span class="keyword">const</span> <span class="variable">dev</span> = {</div>
+        <div class="line">&nbsp;&nbsp;<span class="keyword">name</span>: <span class="value" id="val-name"></span></div>
+        <div class="line">&nbsp;&nbsp;<span class="keyword">role</span>: <span class="value" id="val-role"></span>,</div>
+        <div class="line">&nbsp;&nbsp;<span class="keyword">status</span>: <span class="value" id="val-status"></span></div>
+        <div class="line">}</div>
+        
+        <!-- NEW: Loading Comment -->
+        <div class="line comment" id="status-comment">
+          <span class="prefix">// </span>
+          <span class="status-text">Loading portfolio</span>
+          <span class="dots">...</span>
+        </div>
+      </div>
 
-<!-- PORTFOLIO -->
-<main id="portfolio" class="portfolio">
-  <div class="container">
-    <section class="hero">
-      <h1>Nice to meet you,<br>I'm <span>Jacey</span>.</h1>
-      <p>Frontend developer based in Nigeria. I build accessible, performant interfaces with HTML, CSS, and JavaScript.</p>
-      <a href="#" class="btn">View Projects</a>
-    </section>
+      <!-- CONTROLS -->
+      <div class="controls">
+        <button id="skipBtn">Skip</button>
+        <button id="replayBtn">Replay</button>
+        <button id="soundBtn">Sound: On</button>
+      </div>
+    </div>
   </div>
-</main>
 
-<script src="script.js"></script>
+  <!-- 3. PORTFOLIO CONTENT -->
+  <div class="portfolio" id="portfolio">
+    <div class="container">
+      <div class="hero">
+        <h1>Nice to meet you,<br>I'm <span>Jacey</span>.</h1>
+        <p>Frontend developer based in Nigeria. I build accessible, performant interfaces with HTML, CSS, and JavaScript.</p>
+        <a href="#" class="btn">View Projects</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

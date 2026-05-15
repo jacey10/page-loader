@@ -1,163 +1,149 @@
-const enterBtn = document.getElementById("enterBtn");
-
-const entryScreen = document.getElementById("entryScreen");
-const loader = document.getElementById("loader");
-
-const portfolio = document.getElementById("portfolio");
-
-const values = document.querySelectorAll(".value");
-
-const soundBtn = document.getElementById("soundBtn");
-const skipBtn = document.getElementById("skipBtn");
-const replayBtn = document.getElementById("replayBtn");
-
-let soundEnabled = true;
-let skipped = false;
-
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
-
-/* AUDIO */
-
 let audioCtx = null;
+let soundEnabled = true;
+let isTyping = false;
+let dotInterval = null;
 
+// DOM Elements
+const entryScreen = document.getElementById('entryScreen');
+const loader = document.getElementById('loader');
+const portfolio = document.getElementById('portfolio');
+const enterBtn = document.getElementById('enterBtn');
+const skipBtn = document.getElementById('skipBtn');
+const replayBtn = document.getElementById('replayBtn');
+const soundBtn = document.getElementById('soundBtn');
+const statusComment = document.getElementById('status-comment');
+const statusText = statusComment.querySelector('.status-text');
+const dots = statusComment.querySelector('.dots');
+const valName = document.getElementById('val-name');
+const valRole = document.getElementById('val-role');
+const valStatus = document.getElementById('val-status');
+
+const data = [
+  { el: valName, text: '"Jay Cee"' },
+  { el: valRole, text: '"Frontend Developer"' },
+  { el: valStatus, text: '"Available for work"' }
+];
+
+// ---------------- AUDIO LOGIC ----------------
 function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+async function unlockAudio() {
+  initAudio();
+  if (audioCtx.state === "suspended") await audioCtx.resume();
 }
 
 function tick() {
-  if (!soundEnabled) return;
-  if (!audioCtx) return;
-
+  if (!soundEnabled || !audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-
   osc.type = "square";
   osc.frequency.value = 800;
-
   gain.gain.value = 0.03;
-
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-
   osc.start();
-
-  gain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    audioCtx.currentTime + 0.04
-  );
-
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
   osc.stop(audioCtx.currentTime + 0.04);
 }
 
-/* TYPE */
+function toggleSound(buttonEl) {
+  soundEnabled = !soundEnabled;
+  if (buttonEl) buttonEl.textContent = `Sound: ${soundEnabled ? "On" : "Off"}`;
+}
 
-async function typeLine(el) {
+// ---------------- LOADER LOGIC ----------------
+function startDots() {
+  statusComment.style.opacity = '1';
+  let count = 0;
+  dotInterval = setInterval(() => {
+    count = (count % 3) + 1;
+    dots.textContent = '.'.repeat(count);
+  }, 450);
+}
 
-  const text = el.dataset.value;
+function stopDots() {
+  clearInterval(dotInterval);
+  dots.textContent = '';
+}
 
-  el.textContent = "";
-  el.classList.add("typing");
+function finishLoading() {
+  stopDots();
+  statusComment.classList.add('loaded');
+  statusText.textContent = '✅ Portfolio loaded';
+}
 
-  for (const char of text) {
-
-    if (skipped) {
-      el.textContent = text;
-      break;
-    }
-
+async function typeElement(el, text) {
+  el.textContent = '';
+  el.classList.add('typing');
+  for (let char of text) {
+    if (!isTyping && el !== valStatus) return;
     el.textContent += char;
-
-    tick();
-
-    await delay(50);
+    if (Math.random() > 0.5) tick(); // Random tick to avoid audio overlap
+    await new Promise(r => setTimeout(r, 70));
   }
-
-  el.classList.remove("typing");
+  el.classList.remove('typing');
 }
 
-/* LOADER */
+async function runSequence() {
+  isTyping = true;
+  statusComment.classList.remove('loaded');
+  statusText.textContent = 'Loading portfolio';
+  statusComment.style.opacity = '1';
+  data.forEach(item => item.el.textContent = '');
+  
+  startDots();
 
-async function runLoader() {
-
-  skipped = false;
-
-  values.forEach(el => {
-    el.textContent = "";
-  });
-
-  for (const el of values) {
-    await typeLine(el);
-    await delay(150);
+  for (let item of data) {
+    await typeElement(item.el, item.text);
+    if (!isTyping) break;
+    await new Promise(r => setTimeout(r, 300));
   }
 
-  const done = document.createElement("div");
-
-  done.textContent = "// Portfolio loaded";
-  done.style.color = "#00B48A";
-
-  document.querySelector(".code-block").appendChild(done);
-
-  await delay(600);
-
-  loader.classList.add("hidden");
-
-  portfolio.classList.add("show");
+  if (isTyping) {
+    finishLoading();
+    await new Promise(r => setTimeout(r, 800));
+    revealPortfolio();
+  }
 }
 
-/* SKIP */
+function revealPortfolio() {
+  loader.classList.add('hidden');
+  portfolio.classList.add('show');
+}
 
 function skipLoader() {
-
-  skipped = true;
-
-  values.forEach(el => {
-    el.textContent = el.dataset.value;
-  });
-
-  loader.classList.add("hidden");
-
-  portfolio.classList.add("show");
+  isTyping = false;
+  stopDots();
+  finishLoading();
+  revealPortfolio();
 }
 
-/* SOUND */
+function resetLoader() {
+  isTyping = false;
+  stopDots();
+  portfolio.classList.remove('show');
+  loader.classList.remove('hidden');
+  entryScreen.classList.add('hidden');
+  setTimeout(runSequence, 100);
+}
 
-soundBtn.addEventListener("click", async () => {
-
-  initAudio();
-
-  await audioCtx.resume();
-
-  soundEnabled = !soundEnabled;
-
-  soundBtn.textContent =
-    soundEnabled
-      ? "Sound: On"
-      : "Sound: Off";
+// ---------------- EVENT LISTENERS ----------------
+enterBtn.addEventListener('click', async () => {
+  await unlockAudio();
+  entryScreen.classList.add('hidden');
+  runSequence();
 });
 
-/* REPLAY */
+skipBtn.addEventListener('click', skipLoader);
 
-replayBtn.addEventListener("click", () => {
-  location.reload();
+replayBtn.addEventListener('click', async () => {
+  await unlockAudio();
+  resetLoader();
 });
 
-/* SKIP */
-
-skipBtn.addEventListener("click", skipLoader);
-
-/* ENTER */
-
-enterBtn.addEventListener("click", async () => {
-
-  initAudio();
-
-  await audioCtx.resume();
-
-  entryScreen.classList.add("hidden");
-
-  loader.classList.remove("hidden");
-
-  runLoader();
+soundBtn.addEventListener('click', async () => {
+  await unlockAudio();
+  toggleSound(soundBtn);
 });
