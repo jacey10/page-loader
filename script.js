@@ -2,6 +2,7 @@ let audioCtx = null;
 let soundEnabled = true;
 let isTyping = false;
 let dotInterval = null;
+let isResetting = false; // Prevents rapid replay spam
 
 // DOM Elements
 const entryScreen = document.getElementById('entryScreen');
@@ -57,6 +58,7 @@ function toggleSound(buttonEl) {
 function startDots() {
   statusComment.style.opacity = '1';
   let count = 0;
+  clearInterval(dotInterval); // Safety clear
   dotInterval = setInterval(() => {
     count = (count % 3) + 1;
     dots.textContent = '.'.repeat(count);
@@ -78,21 +80,25 @@ async function typeElement(el, text) {
   el.textContent = '';
   el.classList.add('typing');
   for (let char of text) {
-    if (!isTyping && el !== valStatus) return;
+    if (!isTyping) break; // Abort immediately if reset/skip fired
     el.textContent += char;
-    if (Math.random() > 0.5) tick(); // Random tick to avoid audio overlap
+    if (Math.random() > 0.5) tick();
     await new Promise(r => setTimeout(r, 70));
   }
   el.classList.remove('typing');
 }
 
+// ---------------- SEQUENCE CONTROL ----------------
 async function runSequence() {
+  if (isResetting) return;
   isTyping = true;
+  
+  // Reset DOM
+  data.forEach(item => item.el.textContent = '');
   statusComment.classList.remove('loaded');
   statusText.textContent = 'Loading portfolio';
   statusComment.style.opacity = '1';
-  data.forEach(item => item.el.textContent = '');
-  
+
   startDots();
 
   for (let item of data) {
@@ -114,6 +120,7 @@ function revealPortfolio() {
 }
 
 function skipLoader() {
+  if (isResetting) return;
   isTyping = false;
   stopDots();
   finishLoading();
@@ -121,12 +128,22 @@ function skipLoader() {
 }
 
 function resetLoader() {
+  if (isResetting) return; // Block spam clicks
+  isResetting = true;
+
+  // 1. Stop all active processes
   isTyping = false;
-  stopDots();
+  clearInterval(dotInterval);
+
+  // 2. Reset UI state
   portfolio.classList.remove('show');
   loader.classList.remove('hidden');
-  entryScreen.classList.add('hidden');
-  setTimeout(runSequence, 100);
+
+  // 3. Wait for CSS transition to finish before restarting
+  setTimeout(() => {
+    isResetting = false;
+    runSequence();
+  }, 400); // Matches your 0.6s transition with a small buffer
 }
 
 // ---------------- EVENT LISTENERS ----------------
@@ -137,7 +154,6 @@ enterBtn.addEventListener('click', async () => {
 });
 
 skipBtn.addEventListener('click', skipLoader);
-
 replayBtn.addEventListener('click', async () => {
   await unlockAudio();
   resetLoader();
