@@ -25,6 +25,14 @@ const data = [
   { el: valStatus, text: '"Available for work"' }
 ];
 
+// Check if user already entered this session
+const hasEntered = sessionStorage.getItem('portfolio_entered') === 'true';
+
+if (hasEntered) {
+  entryScreen.classList.add('hidden');
+  runSequence(); // Auto-start loader on refresh
+}
+
 // ---------------- AUDIO LOGIC ----------------
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -147,8 +155,10 @@ function resetLoader() {
 }
 
 // ---------------- EVENT LISTENERS ----------------
+
 enterBtn.addEventListener('click', async () => {
   await unlockAudio();
+  sessionStorage.setItem('portfolio_entered', 'true'); // <-- Add this
   entryScreen.classList.add('hidden');
   runSequence();
 });
